@@ -1,3 +1,5 @@
+import 'package:cleanarchiteture/domain/helpers/helpers.dart';
+
 import '../../domain/useCases/use_cases.dart';
 import '../http/http.dart';
 
@@ -7,8 +9,12 @@ class RemoteAuthentication {
   RemoteAuthentication({required this.httpClient, required this.url});
 
   Future<void> auth(AuthenticationParams params) async {
-    final body = RemoteAuthenticationParams.fromDomain(params).toJson();
-    await httpClient.request(url: url, method: 'post', body: body);
+    try {
+      final body = RemoteAuthenticationParams.fromDomain(params).toJson();
+      await httpClient.request(url: url, method: 'post', body: body);
+    } on HttpError {
+      throw DomainError.unexpected;
+    }
   }
 }
 

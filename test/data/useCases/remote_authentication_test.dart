@@ -1,28 +1,49 @@
 import 'package:cleanarchiteture/data/http/http.dart';
 import 'package:cleanarchiteture/data/useCases/use_cases.dart';
+import 'package:cleanarchiteture/domain/helpers/helpers.dart';
 import 'package:cleanarchiteture/domain/useCases/authentication.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 
-class HttpClientSpy extends Mock implements HttpClient {}
+import '../mocks/mocks.dart';
 
 void main() {
   late HttpClientSpy httpClient;
   late String url;
   late RemoteAuthentication sut;
+
   setUp(() {
     httpClient = HttpClientSpy();
     url = faker.internet.httpUrl();
     sut = RemoteAuthentication(httpClient: httpClient, url: url);
   });
+
   test('Should call HttpClient with correct values', () async {
     final params = AuthenticationParams(
         email: faker.internet.email(), password: faker.internet.password());
+    when(() => httpClient.request(
+          url: url,
+          method: 'post',
+          body: {'email': params.email, 'password': params.password},
+        )).thenAnswer((_) async => {});
     await sut.auth(params);
-    verify(httpClient.request(
-        url: url,
-        method: 'post',
-        body: {'email': params.email, 'password': params.password}));
+    verify(() => httpClient.request(
+          url: url,
+          method: 'post',
+          body: {'email': params.email, 'password': params.password},
+        ));
+  });
+
+  test('Should throw UnexpectedError if HttpClient returns 400', () async {
+    when(() => httpClient.request(
+        url: any(named: 'url'),
+        method: any(named: 'method'),
+        body: any(named: 'body'))).thenThrow(HttpError.badRequest);
+
+    final params = AuthenticationParams(
+        email: faker.internet.email(), password: faker.internet.password());
+    final future = sut.auth(params);
+    expect(future, throwsA(DomainError.unexpected));
   });
 }
