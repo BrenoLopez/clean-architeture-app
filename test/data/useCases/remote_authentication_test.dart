@@ -87,14 +87,13 @@ void main() {
   test(
       'Should throw UnexpectedError if HttpClient returns 200 with invalid data',
       () async {
-    final accessToken = faker.guid.guid();
     when(() =>
         httpClient.request(
             url: any(named: 'url'),
             method: any(named: 'method'),
             body: any(named: 'body'))).thenAnswer(
-        (_) async => {'accessToken': accessToken, 'name': faker.person.name()});
-    final account = await sut.auth(params);
-    expect(account.token, accessToken);
+        (_) async => {'invalid_key': 'invalid_value'});
+     final future = sut.auth(params);
+    expect(future, throwsA(DomainError.unexpected));
   });
 }
