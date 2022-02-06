@@ -12,7 +12,7 @@ class HttpAdapter implements HttpClient {
   HttpAdapter(this.client);
 
   @override
-  Future<Map<String, dynamic>> request(
+  Future<Map<String, dynamic>?> request(
       {required String url,
       required String method,
       Map<String, dynamic>? body}) async {
@@ -23,7 +23,11 @@ class HttpAdapter implements HttpClient {
     final jsonBody = body != null ? jsonEncode(body) : null;
     final response =
         await client.post(Uri.parse(url), headers: headers, body: jsonBody);
-    return response.body.isEmpty ? null : jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      return response.body.isEmpty ? null : jsonDecode(response.body);
+    } else {
+      return null;
+    }
   }
 }
 
@@ -70,6 +74,22 @@ void main() {
           body: '{"any_key":"any_value"}'));
     });
 
+    test('Should return data if post returns 200', () async {
+      mockResponse(200);
+
+      final response = await sut.request(url: url, method: 'post');
+
+      expect(response, {'any_key': 'any_value'});
+    });
+
+    test('Should return null if post returns 200', () async {
+      mockResponse(200, body: '');
+
+      final response = await sut.request(url: url, method: 'post');
+
+      expect(response, null);
+    });
+
     test('Should call post without body', () async {
       mockResponse(200, body: '{}');
 
@@ -81,13 +101,20 @@ void main() {
           }));
     });
 
-    test('Should return data if post returns 200', () async {
-      when(() => client.post(any(), headers: any(named: 'headers')))
-          .thenAnswer((_) async => Response('{"any_key":"any_value"}', 200));
+    test('Should return no data if post returns 204', () async {
+      mockResponse(204, body: '');
 
       final response = await sut.request(url: url, method: 'post');
 
-      expect(response, {'any_key': 'any_value'});
+      expect(response, null);
+    });
+
+    test('Should return null if post returns 204 with data', () async {
+      mockResponse(204);
+
+      final response = await sut.request(url: url, method: 'post');
+
+      expect(response, null);
     });
   });
 }
