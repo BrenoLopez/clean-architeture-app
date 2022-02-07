@@ -23,6 +23,13 @@ void main() {
     registerFallbackValue(Uri.parse(url));
   });
 
+  group('SHARED', () {
+    test('Should throw ServerError if invalid method is provider', () async {
+      final future = sut.request(url: url, method: 'post');
+
+      expect(future, throwsA(HttpError.serverError));
+    });
+  });
   group('POST', () {
     When mockRequest() => when(() => client.post(any(),
         body: any(named: 'body'), headers: any(named: 'headers')));
