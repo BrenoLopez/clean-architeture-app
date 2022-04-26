@@ -30,6 +30,7 @@ void main() {
       expect(future, throwsA(HttpError.serverError));
     });
   });
+
   group('POST', () {
     When mockRequest() => when(() => client.post(any(),
         body: any(named: 'body'), headers: any(named: 'headers')));
@@ -37,6 +38,10 @@ void main() {
     void mockResponse(int statusCode,
         {String body = '{"any_key":"any_value"}'}) {
       mockRequest().thenAnswer((_) async => Response(body, statusCode));
+    }
+
+    void mockError() {
+      mockRequest().thenThrow(Exception());
     }
 
     setUp(() => {
@@ -98,7 +103,7 @@ void main() {
       expect(response, null);
     });
 
-    test('Should return badRequestERror if post returns 400 with data',
+    test('Should return badRequestError if post returns 400 with data',
         () async {
       mockResponse(400);
 
@@ -146,5 +151,13 @@ void main() {
 
       expect(future, throwsA(HttpError.serverError));
     });
+
+    // test('Should return ServerError if post returns throws', () async {
+    //   mockError();
+
+    //   final future = sut.request(url: url, method: 'post');
+
+    //   expect(future, throwsA(HttpError.serverError));
+    // });
   });
 }

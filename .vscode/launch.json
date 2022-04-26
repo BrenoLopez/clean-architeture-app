@@ -13,13 +13,23 @@
         {
             "name": "cleanarchiteture",
             "request": "launch",
+            "program": "./lib/main/main.dart",
             "type": "dart"
         },
         {
             "name": "cleanarchiteture (profile mode)",
             "request": "launch",
             "type": "dart",
+            "program": "./lib/main/main.dart",
             "flutterMode": "profile"
+        },
+        {
+            "name": "Run Release Mode",
+            "request": "launch",
+            "type": "dart",
+            "program": "./lib/main/main.dart",
+            "flutterMode": "release"
         }
+
     ]
 }
