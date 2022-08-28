@@ -9,8 +9,8 @@ class LoginPage extends StatelessWidget {
         child: Column(
       children: <Widget>[
         Container(
-          child: Image(
-            image: const AssetImage('./lib/ui/assets/logo.png'),
+          child: const Image(
+            image: AssetImage('./lib/ui/assets/logo.png'),
           ),
         ),
         Text('Login'.toUpperCase()),
